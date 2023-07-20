@@ -39,8 +39,8 @@ def get_first_hotel_info(region: str,
                     "destination": {
                         "regionId": regionId  # id из первого запроса
                     },
-                    "checkInDate": {"day": day_in, "month": month_in, "year": year_in},
-                    "checkOutDate": {"day": day_out, "month": month_out, "year": year_out},
+                    "checkInDate": {"day": int(day_in), "month": int(month_in), "year": int(year_in)},
+                    "checkOutDate": {"day": int(day_out), "month": int(month_out), "year": int(year_out)},
                     "rooms": [{"adults": adults,
                                "children": [{'age': int(i)} for i in children.split(',')]}],
                     "resultsStartingIndex": 0,
@@ -50,7 +50,6 @@ def get_first_hotel_info(region: str,
                     }
         response_2 = api_request(method_endswith='properties/v2/list', params=params_2, method_type='POST')
         return [{'name':data['name'], 'hotel_id': data['id'], 'price': data['price']['lead']['formatted']} for data in response_2['data']['propertySearch']['properties']]
-
-
+        # return response_2
 
 
