@@ -13,11 +13,11 @@ from api import api_request
 # print(response_3['data']['propertyInfo']['propertyGallery'])
 
 def get_first_hotel_info(region: str,
-                         results_size: int,
+                         results_size: str,
                          price_type: str,
                          check_in_date: str,
                          check_out_date: str,
-                         adults: int,
+                         adults: str,
                          children: str):
 
     day_in, month_in, year_in = check_in_date.split('-')
@@ -28,7 +28,8 @@ def get_first_hotel_info(region: str,
         method_endswith='locations/v3/search',
         params={'q': region, 'locale': 'ru_RU'},
         method_type='GET')
-#    print(response_1['sr'][0]['gaiaId'])
+    # print(response_1['sr'][0]['gaiaId'])
+    print(response_1)
     regionId = response_1['sr'][0]['gaiaId']
 
     if price_type == "low":
@@ -41,10 +42,10 @@ def get_first_hotel_info(region: str,
                     },
                     "checkInDate": {"day": int(day_in), "month": int(month_in), "year": int(year_in)},
                     "checkOutDate": {"day": int(day_out), "month": int(month_out), "year": int(year_out)},
-                    "rooms": [{"adults": adults,
+                    "rooms": [{"adults": int(adults),
                                "children": [{'age': int(i)} for i in children.split(',')]}],
                     "resultsStartingIndex": 0,
-                    "resultsSize": results_size,
+                    "resultsSize": int(results_size),
                     "sort": "PRICE_LOW_TO_HIGH",
                     "filters": {"availableFilter": "SHOW_AVAILABLE_ONLY"}
                     }
