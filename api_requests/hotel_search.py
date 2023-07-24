@@ -1,16 +1,5 @@
 from api import api_request
-
-# method_endswith_3 = 'properties/v2/detail'
-# method_type_3 = 'POST'
-# params_3 = {"currency": "USD",
-#             "eapid": 1,
-#             "locale": "ru_RU",
-#             "siteId": 300000001,
-#             "propertyId": response_2['data']['propertySearch']['properties'][0]['id']
-#             }
-# response_3 = api_request(method_endswith=method_endswith_3, params=params_3, method_type=method_type_3)
-# #print(response_3['data']['propertyInfo']['summary']['location']['address']['addressLine'])
-# print(response_3['data']['propertyInfo']['propertyGallery'])
+from requests import get
 
 def get_first_hotel_info(region: str,
                          results_size: str,
@@ -19,17 +8,15 @@ def get_first_hotel_info(region: str,
                          check_out_date: str,
                          adults: str,
                          children: str):
-
     day_in, month_in, year_in = check_in_date.split('-')
     day_out, month_out, year_out = check_out_date.split('-')
-
 
     response_1 = api_request(
         method_endswith='locations/v3/search',
         params={'q': region, 'locale': 'ru_RU'},
         method_type='GET')
     # print(response_1['sr'][0]['gaiaId'])
-    print(response_1)
+    # print(response_1)
     regionId = response_1['sr'][0]['gaiaId']
 
     if price_type == "low":
@@ -50,7 +37,28 @@ def get_first_hotel_info(region: str,
                     "filters": {"availableFilter": "SHOW_AVAILABLE_ONLY"}
                     }
         response_2 = api_request(method_endswith='properties/v2/list', params=params_2, method_type='POST')
-        return [{'name':data['name'], 'hotel_id': data['id'], 'price': data['price']['lead']['formatted']} for data in response_2['data']['propertySearch']['properties']]
+        return [{'name': data['name'], 'hotel_id': data['id'], 'price': data['price']['lead']['formatted']} for data in
+                response_2['data']['propertySearch']['properties']]
         # return response_2
+
+
+def get_second_hotel_info(hotel_id: str):
+    params_3 = {"currency": "USD",
+                "eapid": 1,
+                "locale": "ru_RU",
+                "siteId": 300000001,
+                "propertyId": hotel_id
+                }
+    response_3 = api_request(method_endswith='properties/v2/detail',
+                             params=params_3,
+                             method_type='POST')
+    result = dict
+    result['address'] = response_3['data']['propertyInfo']['summary']['location']['address']['addressLine']
+    result['photos'] = []
+    photos_list = response_3['data']['propertyInfo']['propertyGallery']['images']
+    for i in range(5):
+        result['photos'].append(get(url=photos_list[i]['image']['url']).content)
+    return result
+
 
 
