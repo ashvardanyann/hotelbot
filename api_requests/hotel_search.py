@@ -1,6 +1,7 @@
 from api import api_request
 from requests import get
 
+
 def get_first_hotel_info(region: str,
                          results_size: str,
                          price_type: str,
@@ -15,9 +16,8 @@ def get_first_hotel_info(region: str,
         method_endswith='locations/v3/search',
         params={'q': region, 'locale': 'ru_RU'},
         method_type='GET')
-    # print(response_1['sr'][0]['gaiaId'])
-    # print(response_1)
-    regionId = response_1['sr'][0]['gaiaId']
+
+    region_id = response_1['sr'][0]['gaiaId']
 
     if price_type == "low":
         params_2 = {"currency": "USD",
@@ -25,7 +25,7 @@ def get_first_hotel_info(region: str,
                     "locale": "ru_RU",
                     "siteId": 300000001,
                     "destination": {
-                        "regionId": regionId  # id из первого запроса
+                        "regionId": region_id  # id из первого запроса
                     },
                     "checkInDate": {"day": int(day_in), "month": int(month_in), "year": int(year_in)},
                     "checkOutDate": {"day": int(day_out), "month": int(month_out), "year": int(year_out)},
@@ -39,7 +39,6 @@ def get_first_hotel_info(region: str,
         response_2 = api_request(method_endswith='properties/v2/list', params=params_2, method_type='POST')
         return [{'name': data['name'], 'hotel_id': data['id'], 'price': data['price']['lead']['formatted']} for data in
                 response_2['data']['propertySearch']['properties']]
-        # return response_2
 
 
 def get_second_hotel_info(hotel_id: str):
@@ -52,13 +51,10 @@ def get_second_hotel_info(hotel_id: str):
     response_3 = api_request(method_endswith='properties/v2/detail',
                              params=params_3,
                              method_type='POST')
-    result = dict
+    result = dict()
     result['address'] = response_3['data']['propertyInfo']['summary']['location']['address']['addressLine']
     result['photos'] = []
     photos_list = response_3['data']['propertyInfo']['propertyGallery']['images']
     for i in range(5):
         result['photos'].append(get(url=photos_list[i]['image']['url']).content)
     return result
-
-
-

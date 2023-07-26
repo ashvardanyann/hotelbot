@@ -38,6 +38,7 @@ def get_request(url, params):
     except Exception as e:
         return None
 
+
 def post_request(url, params):
     try:
         headers = {
@@ -56,4 +57,3 @@ def post_request(url, params):
 
     except Exception as e:
         return None
-

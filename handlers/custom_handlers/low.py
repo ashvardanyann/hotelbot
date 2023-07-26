@@ -5,16 +5,21 @@ from telebot.types import Message, InputMediaPhoto
 from keyboards.inline.hotel_inlinekeyboard import inline_buttons
 
 
+@bot.callback_query_handler(func=lambda call: True)
+def callback_query(call):
+    msg = bot.send_message(call.message.chat.id, 'Пожалуйста подождите, идет загрузка ...')
+    hotel_details = get_second_hotel_info(call.data)
+    bot.delete_message(call.message.chat.id, msg.message_id)
+    media = [InputMediaPhoto(hotel_details['photos'][0], caption=f'Адрес отеля - {hotel_details["address"]}')]
+    for i in range(1, 5):
+        media.append(InputMediaPhoto(hotel_details['photos'][i]))
+    bot.send_media_group(call.message.chat.id, media=media)
+
+
 @bot.message_handler(commands=['low'])
 def low(message: Message):
     bot.set_state(message.from_user.id, UserInfoState.region, message.chat.id)
     bot.send_message(message.from_user.id, f'{message.from_user.full_name}, пожалуйста, введите регион')
-    # a = get_second_hotel_info('6434130')
-    # media = [InputMediaPhoto(a['photos'][0], caption=a['address'])]
-    # for i in range(1, 5):
-    #     media.append(InputMediaPhoto(a['photos'][i]))
-    # bot.send_media_group(message.chat.id, media=media)
-    # bot.send_photo(message.chat.id, photo=a['photos'])
 
 
 @bot.message_handler(state=UserInfoState.region)
@@ -44,7 +49,6 @@ def get_results_size(message: Message):
 
 @bot.message_handler(state=UserInfoState.check_in_date)
 def get_check_in_data(message: Message):
-    # if message.text.isdigit():
     bot.send_message(message.from_user.id, 'Спасибо записал. Введите дату выезда (Например, <b>8-5-2023</b>)',
                      parse_mode='HTML')
     bot.set_state(message.from_user.id, UserInfoState.check_out_date, message.chat.id)
@@ -53,21 +57,14 @@ def get_check_in_data(message: Message):
         request_info['check_in_data'] = message.text
 
 
-# else:
-#     bot.send_message(message.from_user.id, 'Дата может содержать только цифры')
-
 @bot.message_handler(state=UserInfoState.check_out_date)
 def get_check_out_data(message: Message):
-    # if message.text.isdigit():
     bot.send_message(message.from_user.id, 'Спасибо записал. Введите количество взрослых')
     bot.set_state(message.from_user.id, UserInfoState.adults, message.chat.id)
 
     with bot.retrieve_data(message.from_user.id, message.chat.id) as request_info:
         request_info['check_out_data'] = message.text
 
-
-# else:
-#     bot.send_message(message.from_user.id, 'Дата содержит только цифры')
 
 @bot.message_handler(state=UserInfoState.adults)
 def adults(message: Message):
@@ -84,12 +81,9 @@ def adults(message: Message):
 
 @bot.message_handler(state=UserInfoState.children)
 def children(message: Message):
-    # if message.text.isdigit():
     bot.send_message(message.from_user.id, 'Спасибо записал.')
 
     with bot.retrieve_data(message.from_user.id, message.chat.id) as request_info:
-        # print(request_info['region'])
-
         hotel_list = get_first_hotel_info(request_info['region'],
                                           request_info['results_size'],
                                           'low',
@@ -100,11 +94,3 @@ def children(message: Message):
         print(hotel_list)
         bot.send_message(message.from_user.id, 'Список отелей:', reply_markup=inline_buttons(hotel_list))
     bot.delete_state(message.from_user.id, message.chat.id)
-
-
-# else:
-#     bot.send_message(message.from_user.id, 'Содержит только цифры')
-
-
-# print(get_first_hotel_info('Рига', 3, 'low', '20-7-2023', '21-7-2023', 2, '5,8,7'))
-# print(get_second_hotel_info('6434130'))

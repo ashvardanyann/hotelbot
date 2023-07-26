@@ -1,5 +1,6 @@
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
+
 def inline_buttons(hotel_list: list[dict]):
     hotel_keyboards = InlineKeyboardMarkup()
     for data in hotel_list:
