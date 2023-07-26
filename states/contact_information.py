@@ -1,5 +1,7 @@
 from telebot.handler_backends import State, StatesGroup
 
+"""Создание состояний бота."""
+
 
 class UserInfoState(StatesGroup):
     region = State()

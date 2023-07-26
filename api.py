@@ -1,6 +1,8 @@
 import requests
 from loader import RAPID_API_KEY
 
+"""Универсальная функция для отправки запросов к hotels4.p.rapidapi.com"""
+
 
 def api_request(method_endswith,  # Меняется в зависимости от запроса. locations/v3/search либо properties/v2/list
                 params,  # Параметры, если locations/v3/search, то {'q': 'Рига', 'locale': 'ru_RU'}
@@ -21,6 +23,9 @@ def api_request(method_endswith,  # Меняется в зависимости �
         )
 
 
+"""Функция для отправки 'GET' запроса."""
+
+
 def get_request(url, params):
     try:
         headers = {
@@ -37,6 +42,9 @@ def get_request(url, params):
             return response.json()
     except Exception as e:
         return None
+
+
+"""Функция для отправки 'POST' запроса."""
 
 
 def post_request(url, params):

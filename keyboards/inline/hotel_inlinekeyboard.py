@@ -1,6 +1,6 @@
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-
+"""Функция создания 'inline' клавиатуры с названиями отелей и ценой ввиде кнопок."""
 def inline_buttons(hotel_list: list[dict]):
     hotel_keyboards = InlineKeyboardMarkup()
     for data in hotel_list:

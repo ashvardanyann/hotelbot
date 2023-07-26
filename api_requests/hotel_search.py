@@ -1,6 +1,8 @@
 from api import api_request
 from requests import get
 
+"""Функция для получения названий отелей и цен."""
+
 
 def get_first_hotel_info(region: str,
                          results_size: str,
@@ -39,6 +41,9 @@ def get_first_hotel_info(region: str,
         response_2 = api_request(method_endswith='properties/v2/list', params=params_2, method_type='POST')
         return [{'name': data['name'], 'hotel_id': data['id'], 'price': data['price']['lead']['formatted']} for data in
                 response_2['data']['propertySearch']['properties']]
+
+
+"""Функция для получения изображений и точного адреса определенного отеля."""
 
 
 def get_second_hotel_info(hotel_id: str):
