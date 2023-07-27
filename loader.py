@@ -4,3 +4,4 @@ from config_data import config
 
 storage = StateMemoryStorage()
 bot = TeleBot(token=config.BOT_TOKEN, state_storage=storage)
+RAPID_API_KEY = config.RAPID_API_KEY
