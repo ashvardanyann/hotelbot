@@ -21,11 +21,15 @@ def callback_query(call):
 """Обработчик команды '/low'"""
 
 
-@bot.message_handler(commands=['low'])
+@bot.message_handler(commands=['low', 'high'])
 def low(message: Message):
     bot.set_state(message.from_user.id, UserInfoState.region, message.chat.id)
     bot.send_message(message.from_user.id, f'{message.from_user.full_name}, пожалуйста, введите регион: (Например, <b>Рига</b>',
                      parse_mode='HTML')
+    with bot.retrieve_data(message.from_user.id, message.chat.id) as request_info:
+        request_info['price_type'] = message.text[1:]
+        # print(request_info['price_type'], type(request_info['price_type']))
+
 
 
 """Сохраняем город, введенный пользователем."""

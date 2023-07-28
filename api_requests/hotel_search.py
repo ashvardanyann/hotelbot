@@ -20,26 +20,34 @@ def get_first_hotel_info(region: str,
         method_type='GET')
 
     region_id = response_1['sr'][0]['gaiaId']
+    params_2 = {"currency": "USD",
+                "eapid": 1,
+                "locale": "ru_RU",
+                "siteId": 300000001,
+                "destination": {
+                    "regionId": region_id  # id из первого запроса
+                },
+                "checkInDate": {"day": int(day_in), "month": int(month_in), "year": int(year_in)},
+                "checkOutDate": {"day": int(day_out), "month": int(month_out), "year": int(year_out)},
+                "rooms": [{"adults": int(adults),
+                           "children": [{'age': int(i)} for i in children.split(',')]}],
+                "resultsStartingIndex": 0,
+                "resultsSize": int(results_size),
+                "sort": "PRICE_LOW_TO_HIGH",
+                "filters": {"availableFilter": "SHOW_AVAILABLE_ONLY"}
+                }
 
     if price_type == "low":
-        params_2 = {"currency": "USD",
-                    "eapid": 1,
-                    "locale": "ru_RU",
-                    "siteId": 300000001,
-                    "destination": {
-                        "regionId": region_id  # id из первого запроса
-                    },
-                    "checkInDate": {"day": int(day_in), "month": int(month_in), "year": int(year_in)},
-                    "checkOutDate": {"day": int(day_out), "month": int(month_out), "year": int(year_out)},
-                    "rooms": [{"adults": int(adults),
-                               "children": [{'age': int(i)} for i in children.split(',')]}],
-                    "resultsStartingIndex": 0,
-                    "resultsSize": int(results_size),
-                    "sort": "PRICE_LOW_TO_HIGH",
-                    "filters": {"availableFilter": "SHOW_AVAILABLE_ONLY"}
-                    }
+
         response_2 = api_request(method_endswith='properties/v2/list', params=params_2, method_type='POST')
-        return [{'name': data['name'], 'hotel_id': data['id'], 'price': data['price']['lead']['formatted']} for data in
+
+    elif price_type == 'high':
+        params_2['sort'] = 'PRICE_HIGH_TO_LOW'
+
+        response_2 = api_request(method_endswith='properties/v2/list', params=params_2, method_type='POST')
+
+
+    return [{'name': data['name'], 'hotel_id': data['id'], 'price': data['price']['lead']['formatted']} for data in
                 response_2['data']['propertySearch']['properties']]
 
 
