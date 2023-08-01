@@ -37,18 +37,21 @@ def get_first_hotel_info(region: str,
                 "filters": {"availableFilter": "SHOW_AVAILABLE_ONLY"}
                 }
 
+    response_2 = list()
+
     if price_type == "low":
 
-        response_2 = api_request(method_endswith='properties/v2/list', params=params_2, method_type='POST')
+        response_2 = api_request(method_endswith='properties/v2/list', params=params_2,
+                                 method_type='POST')['data']['propertySearch']['properties']
 
     elif price_type == 'high':
         params_2['sort'] = 'PRICE_HIGH_TO_LOW'
-
-        response_2 = api_request(method_endswith='properties/v2/list', params=params_2, method_type='POST')
-
+        response_2 = api_request(method_endswith='properties/v2/list', params=params_2,
+                                 method_type='POST')['data']['propertySearch']['properties']
+        response_2 = sorted(response_2, key=lambda x: int(x['price']['lead']['formatted'][1:]), reverse=True)
 
     return [{'name': data['name'], 'hotel_id': data['id'], 'price': data['price']['lead']['formatted']} for data in
-                response_2['data']['propertySearch']['properties']]
+            response_2]
 
 
 """Функция для получения изображений и точного адреса определенного отеля."""
