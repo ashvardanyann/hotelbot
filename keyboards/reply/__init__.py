@@ -1,1 +1,1 @@
-from . import contact
+from . import hotel_replykeyboard

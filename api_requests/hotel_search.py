@@ -29,18 +29,19 @@ def get_first_hotel_info(region: str,
                 },
                 "checkInDate": {"day": int(day_in), "month": int(month_in), "year": int(year_in)},
                 "checkOutDate": {"day": int(day_out), "month": int(month_out), "year": int(year_out)},
-                "rooms": [{"adults": int(adults),
-                           "children": [{'age': int(i)} for i in children.split(',')]}],
+                "rooms": [{"adults": int(adults)}],
                 "resultsStartingIndex": 0,
                 "resultsSize": int(results_size),
                 "sort": "PRICE_LOW_TO_HIGH",
                 "filters": {"availableFilter": "SHOW_AVAILABLE_ONLY"}
                 }
 
+    if children != 'Нет детей':
+        params_2['rooms'][0]['children'] = [{'age': int(data)} for data in children.split(',')]
+
     response_2 = list()
 
     if price_type == "low":
-
         response_2 = api_request(method_endswith='properties/v2/list', params=params_2,
                                  method_type='POST')['data']['propertySearch']['properties']
 
@@ -71,6 +72,6 @@ def get_second_hotel_info(hotel_id: str):
     result['address'] = response_3['data']['propertyInfo']['summary']['location']['address']['addressLine']
     result['photos'] = []
     photos_list = response_3['data']['propertyInfo']['propertyGallery']['images']
-    for i in range(5):
-        result['photos'].append(get(url=photos_list[i]['image']['url']).content)
+    for data in range(5):
+        result['photos'].append(get(url=photos_list[data]['image']['url']).content)
     return result
