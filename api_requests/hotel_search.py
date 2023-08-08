@@ -10,7 +10,8 @@ def get_first_hotel_info(region: str,
                          check_in_date: str,
                          check_out_date: str,
                          adults: str,
-                         children: str):
+                         children: str,
+                         price_diopozon: str = None):
     day_in, month_in, year_in = check_in_date.split('-')
     day_out, month_out, year_out = check_out_date.split('-')
 
@@ -50,6 +51,12 @@ def get_first_hotel_info(region: str,
         response_2 = api_request(method_endswith='properties/v2/list', params=params_2,
                                  method_type='POST')['data']['propertySearch']['properties']
         response_2 = sorted(response_2, key=lambda x: int(x['price']['lead']['formatted'][1:]), reverse=True)
+
+    elif price_type == 'custom':
+        price_min, price_max = price_diopozon.split('-')
+        params_2['filters'] = {"price": {"max": int(price_max), "min": int(price_min)}}
+        response_2 = api_request(method_endswith='properties/v2/list', params=params_2,
+                                 method_type='POST')['data']['propertySearch']['properties']
 
     return [{'name': data['name'], 'hotel_id': data['id'], 'price': data['price']['lead']['formatted']} for data in
             response_2]

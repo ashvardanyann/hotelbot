@@ -22,9 +22,9 @@ def callback_query(call):
     bot.send_media_group(call.message.chat.id, media=media)
 
 
-@bot.message_handler(commands=['low', 'high'])
+@bot.message_handler(commands=['low', 'high', 'custom'])
 def low(message: Message):
-    """Обработчик команды '/low и /high'"""
+    """Обработчик команд '/low, /high и /custom'"""
     bot.set_state(message.from_user.id, UserInfoState.region, message.chat.id)
     bot.send_message(message.from_user.id,
                      f'{message.from_user.full_name}, пожалуйста, введите регион: (Например, <b>Рига</b>)',
@@ -106,18 +106,45 @@ def adults(message: Message):
 def children(message: Message):
     """Сохраняем возраст и количество детей и отправляем ввиде кнопок список отелей и их цены."""
     if re.match(pattern2, message.text) or message.text == 'Нет детей':
-        msg = bot.send_message(message.chat.id, 'Пожалуйста подождите, идет загрузка ...',
-                               reply_markup=ReplyKeyboardRemove(selective=False))
+
         with bot.retrieve_data(message.from_user.id, message.chat.id) as request_info:
-            hotel_list = get_first_hotel_info(request_info['region'],
-                                              request_info['results_size'],
-                                              request_info['price_type'],
-                                              request_info['check_in_data'],
-                                              request_info['check_out_data'],
-                                              request_info['adults'],
-                                              message.text)
-            bot.delete_message(message.chat.id, msg.message_id)
-            bot.send_message(message.from_user.id, 'Список отелей:', reply_markup=inline_buttons(hotel_list))
-        bot.delete_state(message.from_user.id, message.chat.id)
+            if request_info['price_type'] == 'custom':
+                bot.send_message(message.from_user.id,
+                                 'Спасибо записал. Введите желаемый ценовой диапазон в долларах (Например, <b>100-150</b>)',
+                                 parse_mode='HTML')
+                request_info['children'] = message.text
+                bot.set_state(message.from_user.id, UserInfoState.price, message.chat.id)
+            else:
+                msg = bot.send_message(message.chat.id, 'Пожалуйста подождите, идет загрузка ...',
+                                       reply_markup=ReplyKeyboardRemove(selective=False))
+                hotel_list = get_first_hotel_info(request_info['region'],
+                                                  request_info['results_size'],
+                                                  request_info['price_type'],
+                                                  request_info['check_in_data'],
+                                                  request_info['check_out_data'],
+                                                  request_info['adults'],
+                                                  message.text)
+                bot.delete_message(message.chat.id, msg.message_id)
+                bot.send_message(message.from_user.id, 'Список отелей:', reply_markup=inline_buttons(hotel_list))
+                bot.delete_state(message.from_user.id, message.chat.id)
     else:
         bot.send_message(message.from_user.id, 'Пожалуйста, пишите в правильном формате.')
+
+
+@bot.message_handler(state=UserInfoState.price)
+def price(message: Message):
+    with bot.retrieve_data(message.from_user.id, message.chat.id) as request_info:
+        # request_info['price_diopozon'] = message.text
+        msg = bot.send_message(message.chat.id, 'Пожалуйста подождите, идет загрузка ...',
+                               reply_markup=ReplyKeyboardRemove(selective=False))
+        hotel_list = get_first_hotel_info(request_info['region'],
+                                          request_info['results_size'],
+                                          request_info['price_type'],
+                                          request_info['check_in_data'],
+                                          request_info['check_out_data'],
+                                          request_info['adults'],
+                                          request_info['children'],
+                                          price_diopozon=message.text)
+        bot.delete_message(message.chat.id, msg.message_id)
+        bot.send_message(message.from_user.id, 'Список отелей:', reply_markup=inline_buttons(hotel_list))
+        bot.delete_state(message.from_user.id, message.chat.id)
