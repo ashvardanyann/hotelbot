@@ -8,6 +8,7 @@ import re
 
 pattern1 = r'^(0?[1-9]|[1-2][0-9]|3[0-1])-(0?[1-9]|1[0-2])-([0-9]{4})$'
 pattern2 = r'^(\d{1,2})(,\d{1,2})*$'
+pattern3 = r"^\d+-\d+$"
 
 
 @bot.callback_query_handler(func=lambda call: True)
@@ -114,6 +115,7 @@ def children(message: Message):
                                  parse_mode='HTML')
                 request_info['children'] = message.text
                 bot.set_state(message.from_user.id, UserInfoState.price, message.chat.id)
+                return None
             else:
                 msg = bot.send_message(message.chat.id, 'Пожалуйста подождите, идет загрузка ...',
                                        reply_markup=ReplyKeyboardRemove(selective=False))
@@ -126,25 +128,31 @@ def children(message: Message):
                                                   message.text)
                 bot.delete_message(message.chat.id, msg.message_id)
                 bot.send_message(message.from_user.id, 'Список отелей:', reply_markup=inline_buttons(hotel_list))
-                bot.delete_state(message.from_user.id, message.chat.id)
+        bot.delete_state(message.from_user.id, message.chat.id)
     else:
         bot.send_message(message.from_user.id, 'Пожалуйста, пишите в правильном формате.')
 
 
 @bot.message_handler(state=UserInfoState.price)
 def price(message: Message):
-    with bot.retrieve_data(message.from_user.id, message.chat.id) as request_info:
-        # request_info['price_diopozon'] = message.text
-        msg = bot.send_message(message.chat.id, 'Пожалуйста подождите, идет загрузка ...',
-                               reply_markup=ReplyKeyboardRemove(selective=False))
-        hotel_list = get_first_hotel_info(request_info['region'],
-                                          request_info['results_size'],
-                                          request_info['price_type'],
-                                          request_info['check_in_data'],
-                                          request_info['check_out_data'],
-                                          request_info['adults'],
-                                          request_info['children'],
-                                          price_diopozon=message.text)
-        bot.delete_message(message.chat.id, msg.message_id)
-        bot.send_message(message.from_user.id, 'Список отелей:', reply_markup=inline_buttons(hotel_list))
+    """Сохраняем ценовой диапазон и отправляем ввиде кнопок список отелей и их цены."""
+    if re.match(pattern3, message.text):
+
+        with bot.retrieve_data(message.from_user.id, message.chat.id) as request_info:
+            # request_info['price_diopozon'] = message.text
+            msg = bot.send_message(message.chat.id, 'Пожалуйста подождите, идет загрузка ...',
+                                   reply_markup=ReplyKeyboardRemove(selective=False))
+            hotel_list = get_first_hotel_info(request_info['region'],
+                                              request_info['results_size'],
+                                              request_info['price_type'],
+                                              request_info['check_in_data'],
+                                              request_info['check_out_data'],
+                                              request_info['adults'],
+                                              request_info['children'],
+                                              price_diopozon=message.text)
+            bot.delete_message(message.chat.id, msg.message_id)
+            bot.send_message(message.from_user.id, 'Список отелей:', reply_markup=inline_buttons(hotel_list))
         bot.delete_state(message.from_user.id, message.chat.id)
+
+    else:
+        bot.send_message(message.from_user.id, 'Пожалуйста, пишите в правильном формате.')
