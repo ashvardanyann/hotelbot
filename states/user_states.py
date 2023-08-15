@@ -1,7 +1,7 @@
 from telebot.handler_backends import State, StatesGroup
 
 
-class UserInfoState(StatesGroup):
+class UserStates(StatesGroup):
     """Создание состояний бота."""
     region = State()
     results_size = State()
