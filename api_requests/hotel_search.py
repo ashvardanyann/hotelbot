@@ -1,8 +1,6 @@
 from api import api_request
 from requests import get
 
-"""Функция для получения названий отелей и цен."""
-
 
 def get_first_hotel_info(region: str,
                          results_size: str,
@@ -10,7 +8,9 @@ def get_first_hotel_info(region: str,
                          check_in_date: str,
                          check_out_date: str,
                          adults: str,
-                         children: str):
+                         children: str,
+                         price_diopozon: str = None):
+    """Функция для получения названий отелей и цен."""
     day_in, month_in, year_in = check_in_date.split('-')
     day_out, month_out, year_out = check_out_date.split('-')
 
@@ -51,14 +51,18 @@ def get_first_hotel_info(region: str,
                                  method_type='POST')['data']['propertySearch']['properties']
         response_2 = sorted(response_2, key=lambda x: int(x['price']['lead']['formatted'][1:]), reverse=True)
 
+    elif price_type == 'custom':
+        price_min, price_max = price_diopozon.split('-')
+        params_2['filters'] = {"price": {"max": int(price_max), "min": int(price_min)}}
+        response_2 = api_request(method_endswith='properties/v2/list', params=params_2,
+                                 method_type='POST')['data']['propertySearch']['properties']
+
     return [{'name': data['name'], 'hotel_id': data['id'], 'price': data['price']['lead']['formatted']} for data in
             response_2]
 
 
-"""Функция для получения изображений и точного адреса определенного отеля."""
-
-
 def get_second_hotel_info(hotel_id: str):
+    """Функция для получения изображений и точного адреса определенного отеля."""
     params_3 = {"currency": "USD",
                 "eapid": 1,
                 "locale": "ru_RU",
