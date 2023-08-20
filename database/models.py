@@ -1,5 +1,5 @@
 from peewee import *
-import datetime
+
 
 db = SqliteDatabase('bot_db.db')
 
@@ -12,14 +12,22 @@ class BaseModel(Model):
 
 
 class User(BaseModel):
-    user_id = IntegerField()
+    tg_user_id = IntegerField()
     user_name = CharField()
-    start_date = DateTimeField()
+    start_datetime = DateTimeField()
 
     class Meta:
-        table_name = 'Users'
+        table_name = 'users'
 
 
-with db:
-    db.create_tables([User])
-    User(user_id=123123113, user_name = "asdasd", start_date=datetime.datetime.now()).save()
+class History(BaseModel):
+    user_id = ForeignKeyField(User)
+    request_datetime = DateTimeField()
+    command_tipe = CharField()
+    region = CharField()
+    results_size = IntegerField()
+    check_in_date = DateField()
+    check_out_date = DateField()
+    adults = IntegerField()
+    children = CharField()
+    price = IntegerField()
