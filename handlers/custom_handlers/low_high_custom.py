@@ -5,6 +5,7 @@ from telebot.types import Message, InputMediaPhoto, ReplyKeyboardRemove
 from keyboards.inline.hotel_inlinekeyboard import inline_buttons
 from keyboards.reply.hotel_replykeyboard import children_button
 import re
+from database import DataBase as db
 
 # Создаем паттерны для регулярных выражений
 pattern1 = r'^(0?[1-9]|[1-2][0-9]|3[0-1])-(0?[1-9]|1[0-2])-([0-9]{4})$'
@@ -121,15 +122,17 @@ def children(message: Message):
             else:
                 msg = bot.send_message(message.chat.id, 'Пожалуйста подождите, идет загрузка ...',
                                        reply_markup=ReplyKeyboardRemove(selective=False))
+                request_info['children'] = message.text
                 hotel_list = get_first_hotel_info(request_info['region'],
                                                   request_info['results_size'],
                                                   request_info['price_type'],
                                                   request_info['check_in_data'],
                                                   request_info['check_out_data'],
                                                   request_info['adults'],
-                                                  message.text)
+                                                  request_info['children'])
                 bot.delete_message(message.chat.id, msg.message_id)
                 bot.send_message(message.from_user.id, 'Список отелей:', reply_markup=inline_buttons(hotel_list))
+                db.save_action(message.from_user.id, request_info)
         bot.delete_state(message.from_user.id, message.chat.id)
     else:
         bot.send_message(message.from_user.id, 'Пожалуйста, пишите в правильном формате.')
@@ -143,6 +146,7 @@ def price(message: Message):
         with bot.retrieve_data(message.from_user.id, message.chat.id) as request_info:
             msg = bot.send_message(message.chat.id, 'Пожалуйста подождите, идет загрузка ...',
                                    reply_markup=ReplyKeyboardRemove(selective=False))
+            request_info['price_diopozon'] = message.text
             hotel_list = get_first_hotel_info(request_info['region'],
                                               request_info['results_size'],
                                               request_info['price_type'],
@@ -150,9 +154,10 @@ def price(message: Message):
                                               request_info['check_out_data'],
                                               request_info['adults'],
                                               request_info['children'],
-                                              price_diopozon=message.text)
+                                              request_info['price_diopozon'])
             bot.delete_message(message.chat.id, msg.message_id)
             bot.send_message(message.from_user.id, 'Список отелей:', reply_markup=inline_buttons(hotel_list))
+            db.save_action(message.from_user.id, request_info, price=request_info['price_diopozon'])
         bot.delete_state(message.from_user.id, message.chat.id)
 
     else:
