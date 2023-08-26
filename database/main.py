@@ -38,3 +38,26 @@ class DataBase:
                     adults=request_info['adults'],
                     children=request_info['children'],
                     price=price).save()
+
+    @staticmethod
+    def get_history(tg_user_id):
+        with db:
+            user_id = User.get(User.tg_user_id == tg_user_id).id
+            user_requests = History.select().where(History.user_id == user_id).order_by(History.id.desc()).limit(10)
+            text = ""
+            num = 1
+            for data in reversed(user_requests):
+                if num < 11:
+                    text += (f"{abs(num)} <b>{data.region}</b> | кол.отелей: <b>{data.results_size}</b>\n | заезд: <b>{data.check_in_date}</b>\n | "
+                             f"выезд: <b>{data.check_out_date}</b>\n | взрослые: <b>{data.adults}</b>\n | возрасты детей: <b>{data.children}</b>\n")
+                    if data.command_type == "low":
+                        text += f" | цены: <b>дешевые</b>\n\n"
+                    elif data.command_type == "high":
+                        text += f" | цены: <b>дорогие</b>\n\n"
+                    elif data.command_type == "custom":
+                        text += f" | цены: <b>{data.price}</b>$\n\n"
+                    num += 1
+                else:
+                    return text
+
+            return text

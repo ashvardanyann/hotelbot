@@ -26,7 +26,7 @@ def callback_query(call):
 
 
 @bot.message_handler(commands=['low', 'high', 'custom'])
-def low(message: Message):
+def low_high_custom(message: Message):
     """Обработчик команд /low, /high и /custom который сохраняет тип команды и ставит бота в состояние region."""
     bot.set_state(message.from_user.id, UserStates.region, message.chat.id)
     bot.send_message(message.from_user.id,
