@@ -1,5 +1,6 @@
 import requests
 from loader import RAPID_API_KEY
+from logger_dir import logger
 
 
 def api_request(method_endswith,  # Меняется в зависимости от запроса. locations/v3/search либо properties/v2/list
@@ -35,10 +36,12 @@ def get_request(url, params):
             params=params,
             timeout=15
         )
+
         if response.status_code == requests.codes.ok:
             return response.json()
     except Exception as e:
-        return None  # пока не реализована
+        logger.error(e)
+        return None
 
 
 def post_request(url, params):
@@ -55,8 +58,10 @@ def post_request(url, params):
             headers=headers,
             timeout=15
         )
+
         if response.status_code == requests.codes.ok:
             return response.json()
 
     except Exception as e:
-        return None  # пока не реализована
+        logger.error(e)
+        return None

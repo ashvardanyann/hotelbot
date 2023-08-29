@@ -18,11 +18,14 @@ def callback_query(call):
     """Обработчик кнопок, который возвращает фотографии и точный адрес выбранного отеля."""
     msg = bot.send_message(call.message.chat.id, 'Пожалуйста подождите, идет загрузка ...')
     hotel_details = get_second_hotel_info(call.data)
-    media = [InputMediaPhoto(hotel_details['photos'][0], caption=f'Адрес отеля - {hotel_details["address"]}')]
     bot.delete_message(call.message.chat.id, msg.message_id)
-    for data in range(1, 5):
-        media.append(InputMediaPhoto(hotel_details['photos'][data]))
-    bot.send_media_group(call.message.chat.id, media=media)
+    if hotel_details is None:
+        bot.send_message(call.message.chat.id, 'Что-то пошло не так попробуйте еще раз(')
+    else:
+        media = [InputMediaPhoto(hotel_details['photos'][0], caption=f'Адрес отеля - {hotel_details["address"]}')]
+        for data in range(1, 5):
+            media.append(InputMediaPhoto(hotel_details['photos'][data]))
+        bot.send_media_group(call.message.chat.id, media=media)
 
 
 @bot.message_handler(commands=['low', 'high', 'custom'])
@@ -131,8 +134,11 @@ def children(message: Message):
                                                   request_info['adults'],
                                                   request_info['children'])
                 bot.delete_message(message.chat.id, msg.message_id)
-                bot.send_message(message.from_user.id, 'Список отелей:', reply_markup=inline_buttons(hotel_list))
-                db.save_action(message.from_user.id, request_info)
+                if hotel_list is None:
+                    bot.send_message(message.from_user.id, 'Что-то пошло не так попробуйте еще раз(')
+                else:
+                    bot.send_message(message.from_user.id, 'Список отелей:', reply_markup=inline_buttons(hotel_list))
+                    db.save_action(message.from_user.id, request_info)
         bot.delete_state(message.from_user.id, message.chat.id)
     else:
         bot.send_message(message.from_user.id, 'Пожалуйста, пишите в правильном формате.')
@@ -156,8 +162,11 @@ def price(message: Message):
                                               request_info['children'],
                                               request_info['price_diopozon'])
             bot.delete_message(message.chat.id, msg.message_id)
-            bot.send_message(message.from_user.id, 'Список отелей:', reply_markup=inline_buttons(hotel_list))
-            db.save_action(message.from_user.id, request_info, price=request_info['price_diopozon'])
+            if hotel_list is None:
+                bot.send_message(message.from_user.id, 'Что-то пошло не так попробуйте еще раз(')
+            else:
+                bot.send_message(message.from_user.id, 'Список отелей:', reply_markup=inline_buttons(hotel_list))
+                db.save_action(message.from_user.id, request_info, price=request_info['price_diopozon'])
         bot.delete_state(message.from_user.id, message.chat.id)
 
     else:

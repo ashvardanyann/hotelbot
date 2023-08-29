@@ -47,17 +47,14 @@ class DataBase:
             text = ""
             num = 1
             for data in reversed(user_requests):
-                if num < 11:
-                    text += (f"{abs(num)} <b>{data.region}</b> | кол.отелей: <b>{data.results_size}</b>\n | заезд: <b>{data.check_in_date}</b>\n | "
-                             f"выезд: <b>{data.check_out_date}</b>\n | взрослые: <b>{data.adults}</b>\n | возрасты детей: <b>{data.children}</b>\n")
-                    if data.command_type == "low":
-                        text += f" | цены: <b>дешевые</b>\n\n"
-                    elif data.command_type == "high":
-                        text += f" | цены: <b>дорогие</b>\n\n"
-                    elif data.command_type == "custom":
-                        text += f" | цены: <b>{data.price}</b>$\n\n"
-                    num += 1
-                else:
-                    return text
+                text += (f"{abs(num)} <b>{data.region}</b> | кол.отелей: <b>{data.results_size}</b>\n | заезд: <b>{data.check_in_date}</b>\n | "
+                         f"выезд: <b>{data.check_out_date}</b>\n | взрослые: <b>{data.adults}</b>\n | возрасты детей: <b>{data.children}</b>\n")
+                if data.command_type == "low":
+                    text += f" | цены: <b>дешевые</b>\n\n"
+                elif data.command_type == "high":
+                    text += f" | цены: <b>дорогие</b>\n\n"
+                elif data.command_type == "custom":
+                    text += f" | цены: <b>{data.price}</b>$\n\n"
+                num += 1
 
             return text

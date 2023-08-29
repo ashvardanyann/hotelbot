@@ -1,4 +1,4 @@
-from api import api_request
+from .api import api_request
 from requests import get
 
 
@@ -18,6 +18,9 @@ def get_first_hotel_info(region: str,
         method_endswith='locations/v3/search',
         params={'q': region, 'locale': 'ru_RU'},
         method_type='GET')
+
+    if response_1 is None:
+        return None
 
     region_id = response_1['sr'][0]['gaiaId']
     params_2 = {"currency": "USD",
@@ -57,6 +60,9 @@ def get_first_hotel_info(region: str,
         response_2 = api_request(method_endswith='properties/v2/list', params=params_2,
                                  method_type='POST')['data']['propertySearch']['properties']
 
+    if response_2 is None:
+        return None
+
     return [{'name': data['name'], 'hotel_id': data['id'], 'price': data['price']['lead']['formatted']} for data in
             response_2]
 
@@ -72,6 +78,10 @@ def get_second_hotel_info(hotel_id: str):
     response_3 = api_request(method_endswith='properties/v2/detail',
                              params=params_3,
                              method_type='POST')
+
+    if response_3 is None:
+        return None
+
     result = dict()
     result['address'] = response_3['data']['propertyInfo']['summary']['location']['address']['addressLine']
     result['photos'] = []
