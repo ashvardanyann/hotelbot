@@ -3,28 +3,30 @@ import datetime
 
 
 class DataBase:
+    """Класс для работы с базой данных"""
     @staticmethod
     def create_db():
+        """На основе моделей таблиц создаем таблицы users и history"""
         db.create_tables([User, History])
 
     @staticmethod
     def _user_exists(tg_user_id):
+        """Проверяем есть ли пользователь с tg_user_id в базе данных если есть то возвращаем True в противном случае
+        False"""
         with db:
             return bool(User.select().where(User.tg_user_id == tg_user_id))
 
     def add_user(self, tg_user_id, user_name):
-        # print(self._user_exists(tg_user_id))
-        if not self._user_exists(tg_user_id):
+        """Добавляем пользователя с tg_user_id в бау данных"""
+        if not self._user_exists(tg_user_id):  # проверяем есть ли пользователь с tg_user_id в БД если нет то добавляем
             with db:
                 User(tg_user_id=tg_user_id,
                      user_name=user_name,
                      start_datetime=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")).save()
-        with db:
-            row = User.get(User.tg_user_id == tg_user_id)
-            print(row.id)
 
     @staticmethod
     def save_action(tg_user_id, request_info, price="0"):
+        """Сохраняем всю информацию запроса в базе данных"""
         with db:
             user_start_info = User.get(User.tg_user_id == tg_user_id)
             # print(user_start_info.id)
@@ -41,6 +43,7 @@ class DataBase:
 
     @staticmethod
     def get_history(tg_user_id):
+        """Возвращаем историю последних 10 запросов пользователя"""
         with db:
             user_id = User.get(User.tg_user_id == tg_user_id).id
             user_requests = History.select().where(History.user_id == user_id).order_by(History.id.desc()).limit(10)

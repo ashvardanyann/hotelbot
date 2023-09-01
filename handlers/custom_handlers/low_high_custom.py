@@ -126,7 +126,8 @@ def children(message: Message):
                 msg = bot.send_message(message.chat.id, 'Пожалуйста подождите, идет загрузка ...',
                                        reply_markup=ReplyKeyboardRemove(selective=False))
                 request_info['children'] = message.text
-                hotel_list = get_first_hotel_info(request_info['region'],
+                hotel_list = get_first_hotel_info(request_info['region'],  # отправляем запрос на получение списка
+                                                  # отелей
                                                   request_info['results_size'],
                                                   request_info['price_type'],
                                                   request_info['check_in_data'],
@@ -138,7 +139,7 @@ def children(message: Message):
                     bot.send_message(message.from_user.id, 'Что-то пошло не так попробуйте еще раз(')
                 else:
                     bot.send_message(message.from_user.id, 'Список отелей:', reply_markup=inline_buttons(hotel_list))
-                    db.save_action(message.from_user.id, request_info)
+                    db.save_action(message.from_user.id, request_info)  # сохраняем всю информацию запроса в базе данных
         bot.delete_state(message.from_user.id, message.chat.id)
     else:
         bot.send_message(message.from_user.id, 'Пожалуйста, пишите в правильном формате.')
@@ -153,7 +154,7 @@ def price(message: Message):
             msg = bot.send_message(message.chat.id, 'Пожалуйста подождите, идет загрузка ...',
                                    reply_markup=ReplyKeyboardRemove(selective=False))
             request_info['price_diopozon'] = message.text
-            hotel_list = get_first_hotel_info(request_info['region'],
+            hotel_list = get_first_hotel_info(request_info['region'],  # отправляем запрос на получение списка отелей
                                               request_info['results_size'],
                                               request_info['price_type'],
                                               request_info['check_in_data'],
@@ -166,7 +167,8 @@ def price(message: Message):
                 bot.send_message(message.from_user.id, 'Что-то пошло не так попробуйте еще раз(')
             else:
                 bot.send_message(message.from_user.id, 'Список отелей:', reply_markup=inline_buttons(hotel_list))
-                db.save_action(message.from_user.id, request_info, price=request_info['price_diopozon'])
+                db.save_action(message.from_user.id, request_info,
+                               price=request_info['price_diopozon'])  # сохраняем всю информацию запроса в базе данных
         bot.delete_state(message.from_user.id, message.chat.id)
 
     else:
