@@ -5,6 +5,7 @@ from telebot.types import Message, InputMediaPhoto, ReplyKeyboardRemove
 from keyboards.inline.hotel_inlinekeyboard import inline_buttons
 from keyboards.reply.hotel_replykeyboard import children_button
 import re
+from database import DataBase as db
 
 # Создаем паттерны для регулярных выражений
 pattern1 = r'^(0?[1-9]|[1-2][0-9]|3[0-1])-(0?[1-9]|1[0-2])-([0-9]{4})$'
@@ -17,15 +18,18 @@ def callback_query(call):
     """Обработчик кнопок, который возвращает фотографии и точный адрес выбранного отеля."""
     msg = bot.send_message(call.message.chat.id, 'Пожалуйста подождите, идет загрузка ...')
     hotel_details = get_second_hotel_info(call.data)
-    media = [InputMediaPhoto(hotel_details['photos'][0], caption=f'Адрес отеля - {hotel_details["address"]}')]
     bot.delete_message(call.message.chat.id, msg.message_id)
-    for data in range(1, 5):
-        media.append(InputMediaPhoto(hotel_details['photos'][data]))
-    bot.send_media_group(call.message.chat.id, media=media)
+    if hotel_details is None:
+        bot.send_message(call.message.chat.id, 'Что-то пошло не так попробуйте еще раз(')
+    else:
+        media = [InputMediaPhoto(hotel_details['photos'][0], caption=f'Адрес отеля - {hotel_details["address"]}')]
+        for data in range(1, 5):
+            media.append(InputMediaPhoto(hotel_details['photos'][data]))
+        bot.send_media_group(call.message.chat.id, media=media)
 
 
 @bot.message_handler(commands=['low', 'high', 'custom'])
-def low(message: Message):
+def low_high_custom(message: Message):
     """Обработчик команд /low, /high и /custom который сохраняет тип команды и ставит бота в состояние region."""
     bot.set_state(message.from_user.id, UserStates.region, message.chat.id)
     bot.send_message(message.from_user.id,
@@ -121,15 +125,21 @@ def children(message: Message):
             else:
                 msg = bot.send_message(message.chat.id, 'Пожалуйста подождите, идет загрузка ...',
                                        reply_markup=ReplyKeyboardRemove(selective=False))
-                hotel_list = get_first_hotel_info(request_info['region'],
+                request_info['children'] = message.text
+                hotel_list = get_first_hotel_info(request_info['region'],  # отправляем запрос на получение списка
+                                                  # отелей
                                                   request_info['results_size'],
                                                   request_info['price_type'],
                                                   request_info['check_in_data'],
                                                   request_info['check_out_data'],
                                                   request_info['adults'],
-                                                  message.text)
+                                                  request_info['children'])
                 bot.delete_message(message.chat.id, msg.message_id)
-                bot.send_message(message.from_user.id, 'Список отелей:', reply_markup=inline_buttons(hotel_list))
+                if hotel_list is None:
+                    bot.send_message(message.from_user.id, 'Что-то пошло не так попробуйте еще раз(')
+                else:
+                    bot.send_message(message.from_user.id, 'Список отелей:', reply_markup=inline_buttons(hotel_list))
+                    db.save_action(message.from_user.id, request_info)  # сохраняем всю информацию запроса в базе данных
         bot.delete_state(message.from_user.id, message.chat.id)
     else:
         bot.send_message(message.from_user.id, 'Пожалуйста, пишите в правильном формате.')
@@ -143,16 +153,22 @@ def price(message: Message):
         with bot.retrieve_data(message.from_user.id, message.chat.id) as request_info:
             msg = bot.send_message(message.chat.id, 'Пожалуйста подождите, идет загрузка ...',
                                    reply_markup=ReplyKeyboardRemove(selective=False))
-            hotel_list = get_first_hotel_info(request_info['region'],
+            request_info['price_diopozon'] = message.text
+            hotel_list = get_first_hotel_info(request_info['region'],  # отправляем запрос на получение списка отелей
                                               request_info['results_size'],
                                               request_info['price_type'],
                                               request_info['check_in_data'],
                                               request_info['check_out_data'],
                                               request_info['adults'],
                                               request_info['children'],
-                                              price_diopozon=message.text)
+                                              request_info['price_diopozon'])
             bot.delete_message(message.chat.id, msg.message_id)
-            bot.send_message(message.from_user.id, 'Список отелей:', reply_markup=inline_buttons(hotel_list))
+            if hotel_list is None:
+                bot.send_message(message.from_user.id, 'Что-то пошло не так попробуйте еще раз(')
+            else:
+                bot.send_message(message.from_user.id, 'Список отелей:', reply_markup=inline_buttons(hotel_list))
+                db.save_action(message.from_user.id, request_info,
+                               price=request_info['price_diopozon'])  # сохраняем всю информацию запроса в базе данных
         bot.delete_state(message.from_user.id, message.chat.id)
 
     else:
