@@ -1,5 +1,5 @@
 from telebot.types import Message
-from database import DataBase
+from database.main import DataBase
 import datetime
 from loader import bot
 

@@ -1,6 +1,6 @@
 from loader import bot
 import handlers # noqa
-from database import DataBase as db
+from database.main import DataBase as db
 from telebot.custom_filters import StateFilter
 from utils.set_bot_commands import set_default_commands
 

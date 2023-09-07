@@ -5,7 +5,7 @@ from telebot.types import Message, InputMediaPhoto, ReplyKeyboardRemove
 from keyboards.inline.hotel_inlinekeyboard import inline_buttons
 from keyboards.reply.hotel_replykeyboard import children_button
 import re
-from database import DataBase as db
+from database.main import DataBase as db
 
 # Создаем паттерны для регулярных выражений
 pattern1 = r'^(0?[1-9]|[1-2][0-9]|3[0-1])-(0?[1-9]|1[0-2])-([0-9]{4})$'
