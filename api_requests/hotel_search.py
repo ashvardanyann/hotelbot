@@ -2,14 +2,14 @@ from .api import api_request
 from requests import get
 
 
-def get_first_hotel_info(region: str,
-                         results_size: str,
-                         price_type: str,
-                         check_in_date: str,
-                         check_out_date: str,
-                         adults: str,
-                         children: str,
-                         price_diopozon: str = None):
+def get_first_hotel_information(region: str,
+                                results_size: str,
+                                price_type: str,
+                                check_in_date: str,
+                                check_out_date: str,
+                                adults: str,
+                                children: str,
+                                price_diopozon: str = None):
     """Функция для получения названий отелей и цен."""
     day_in, month_in, year_in = check_in_date.split('-')
     day_out, month_out, year_out = check_out_date.split('-')
@@ -67,7 +67,7 @@ def get_first_hotel_info(region: str,
             response_2]
 
 
-def get_second_hotel_info(hotel_id: str):
+def get_second_hotel_information(hotel_id: str):
     """Функция для получения изображений и точного адреса определенного отеля."""
     params_3 = {"currency": "USD",
                 "eapid": 1,

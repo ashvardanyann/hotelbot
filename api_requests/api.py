@@ -39,8 +39,8 @@ def get_request(url, params):
 
         if response.status_code == requests.codes.ok:
             return response.json()
-    except Exception as e:
-        logger.error(e)
+    except Exception as data:
+        logger.error(data)
         return None
 
 
@@ -62,6 +62,6 @@ def post_request(url, params):
         if response.status_code == requests.codes.ok:
             return response.json()
 
-    except Exception as e:
-        logger.error(e)
+    except Exception as data:
+        logger.error(data)
         return None
